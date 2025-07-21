@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_USER = 'vaibhavisugandhi1733'
-        DOCKERHUB_REPO = 'myapp5'
+        DOCKERHUB_REPO = 'flaskapp5'
         DOCKERHUB_CREDENTIALS = 'dockerhub-creds'  // Create this in Jenkins credentials
         TARGET_IP = "3.111.52.97"
     }

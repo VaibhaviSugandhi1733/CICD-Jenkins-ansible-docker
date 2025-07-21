@@ -3,7 +3,7 @@
   hosts: target
   become: true
   vars:
-    docker_image: "vaibhavisugandhi1733/myapp5:latest"
+    docker_image: "vaibhavisugandhi1733/flaskapp5:latest"
     app_name: myapp
     container_port: 5000
     host_port: 80
