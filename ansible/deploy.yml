@@ -1,0 +1,51 @@
+---
+- name: Deploy Dockerized App from Docker Hub
+  hosts: target
+  become: true
+  vars:
+    docker_image: "vaibhavisugandhi1733/myapp5:latest"
+    app_name: myapp
+    container_port: 5000
+    host_port: 80
+
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Stop and remove existing container
+      shell: |
+        docker ps -q --filter "name={{ app_name }}" | grep -q . && docker stop {{ app_name }} && docker rm {{ app_name }} || true
+      ignore_errors: true
+
+    - name: Remove old image
+      shell: |
+        docker images -q {{ docker_image }} | grep -q . && docker rmi -f {{ docker_image }} || true
+      ignore_errors: true
+
+    - name: Pull latest image from Docker Hub
+      shell: docker pull {{ docker_image }}
+
+    - name: Run Docker container
+      shell: |
+        docker run -d --name {{ app_name }} -p {{ host_port }}:{{ container_port }} {{ docker_image }}
+
+    - name: Disable password SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+
+    - name: Enable PubkeyAuthentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PubkeyAuthentication'
+        line: 'PubkeyAuthentication yes'
+
+    - name: Restart SSH
+      service:
+        name: ssh
+        state: restarted
+

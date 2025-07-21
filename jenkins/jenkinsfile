@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER = 'vaibhavisugandhi1733'
+        DOCKERHUB_REPO = 'myapp5'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'  // Create this in Jenkins credentials
+        TARGET_IP = "3.111.52.97"
+    }
+
+    stages {
+        stage('Clone Code') {
+            steps {
+                git 'https://github.com/VaibhaviSugandhi1733/CICD-Jenkins-ansible-docker.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKERHUB_USER/$DOCKERHUB_REPO:latest .'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                    echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+                    docker push $DOCKERHUB_USER/$DOCKERHUB_REPO:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Setup SSH Access') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory.ini ansible/setup_ssh.yml -e "remote_host=$TARGET_IP"'
+            }
+        }
+
+        stage('Deploy via Ansible') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory.ini ansible/deploy.yml'
+            }
+        }
+    }
+}
+
