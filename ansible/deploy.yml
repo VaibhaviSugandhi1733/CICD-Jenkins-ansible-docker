@@ -1,21 +1,21 @@
 ---
-- name: Deploy Dockerized App from Docker Hub
+- name: Deploy app from Docker Hub to remote EC2
   hosts: target
   become: true
   vars:
-    docker_image: "vaibhavisugandhi1733/flaskapp5:latest"
+    docker_image: "yourdockerhubusername/myapp:latest"
     app_name: myapp
     container_port: 5000
     host_port: 80
 
   tasks:
-    - name: Ensure Docker is installed
+    - name: Install Docker
       apt:
         name: docker.io
         state: present
-        update_cache: yes
+        update_cache: true
 
-    - name: Stop and remove existing container
+    - name: Stop and remove old container
       shell: |
         docker ps -q --filter "name={{ app_name }}" | grep -q . && docker stop {{ app_name }} && docker rm {{ app_name }} || true
       ignore_errors: true
@@ -25,7 +25,7 @@
         docker images -q {{ docker_image }} | grep -q . && docker rmi -f {{ docker_image }} || true
       ignore_errors: true
 
-    - name: Pull latest image from Docker Hub
+    - name: Pull Docker image from DockerHub
       shell: docker pull {{ docker_image }}
 
     - name: Run Docker container

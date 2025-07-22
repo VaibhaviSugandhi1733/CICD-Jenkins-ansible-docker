@@ -1,18 +1,18 @@
 - name: Setup SSH access
   hosts: localhost
   vars:
-    remote_host: "3.111.52.97"
+    remote_host: "{{ lookup('env', 'TARGET_IP') }}"
     remote_user: ubuntu
-    ssh_key_path: /home/ubuntu/firstkey.pem
+    ssh_key_path: ~/.ssh/id_rsa
   tasks:
     - name: Generate SSH key if not exists
       shell: |
         [ -f {{ ssh_key_path }} ] || ssh-keygen -t rsa -f {{ ssh_key_path }} -N ""
 
-    - name: Copy public key to remote host
+    - name: Copy public key to target
       shell: |
-        sshpass -p "{{ remote_pass | default('') }}" ssh-copy-id -o StrictHostKeyChecking=no -i {{ ssh_key_path }} {{ remote_user }}@{{ remote_host }}
+        sshpass -p "{{ remote_pass | default('') }}" ssh-copy-id -o StrictHostKeyChecking=no -i {{ ssh_key_path }}.pub {{ remote_user }}@{{ remote_host }}
       environment:
         SSHPASS: "{{ remote_pass | default('') }}"
-      ignore_errors: yes
+      ignore_errors: true
 

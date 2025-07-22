@@ -2,16 +2,16 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = 'vaibhavisugandhi1733'
-        DOCKERHUB_REPO = 'flaskapp5'
-        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'  // Create this in Jenkins credentials
-        TARGET_IP = "3.111.52.97"
+        DOCKERHUB_USER = 'yourdockerhubusername'
+        DOCKERHUB_REPO = 'myapp'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'
+        TARGET_IP = '3.111.222.111'  // Replace with your EC2 public IP or make dynamic via env
     }
 
     stages {
         stage('Clone Code') {
             steps {
-                git 'https://github.com/VaibhaviSugandhi1733/CICD-Jenkins-ansible-docker.git'
+                git 'https://github.com/yourname/your-repo.git'
             }
         }
 
@@ -32,9 +32,15 @@ pipeline {
             }
         }
 
+        stage('Generate inventory.ini') {
+            steps {
+                sh 'python3 generate_inventory.py'
+            }
+        }
+
         stage('Setup SSH Access') {
             steps {
-                sh 'ansible-playbook -i ansible/inventory.ini ansible/setup_ssh.yml -e "remote_host=$TARGET_IP"'
+                sh 'ansible-playbook -i ansible/inventory.ini ansible/setup_ssh.yml'
             }
         }
 
