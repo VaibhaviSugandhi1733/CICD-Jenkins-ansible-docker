@@ -8,7 +8,7 @@
     container_port: 5000
     host_port: 80
 
-  - name: Install the latest Docker CE on Ubuntu
+- name: Install the latest Docker CE on Ubuntu
   hosts: all
   become: yes
 
